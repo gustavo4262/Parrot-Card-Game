@@ -23,10 +23,9 @@ h1 {
 }
 .line-cards {
   display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-left: 119px;
-  margin-right: 124px;
+  justify-self: center;
+  margin: 0 auto;
+  transform-style: preserve-3d;
 }
 .card {
   display: flex;
@@ -35,11 +34,21 @@ h1 {
   width: 117px;
   height: 146px;
   background-color: #a7e9af;
-  margin: 17px;
+  margin: 20px;
   border-radius: 5px;
+  transition: 0.5s;
+  transform-style: preserve-3d;
+}
+.front-card,
+.back-card {
+  position: absolute;
+  backface-visibility: hidden;
 }
 img {
   width: 100px;
+}
+.back-card {
+  transform: rotateY(180deg);
 }
 @media (max-width: 500px) {
   .top {

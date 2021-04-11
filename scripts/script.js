@@ -1,9 +1,7 @@
 let allCardsImg = ["bobrossparrot.gif", "explodyparrot.gif", "fiestaparrot.gif", "metalparrot.gif", "revertitparrot.gif", "tripletsparrot.gif", "unicornparrot.gif"];
 const frontImg = "data/images/front.png";
 
-let numberOfCards, selectedCardIndex = -1;
-let cardsFlipped = 0, numberOfMoves = 0;
-let interval;
+let numberOfCards, selectedCardIndex, cardsFlipped, numberOfMoves, interval;
 
 
 function startGame(){
@@ -35,15 +33,15 @@ function startGame(){
     cardsImg = cardsImg.concat(cardsImg);
     cardsImg.sort( () => Math.random() -0.5 );
 
+    document.querySelectorAll(".line-cards").forEach( (el) => el.style.width = `${75*numberOfCards}px`);
+
 }
 
 function endGame(){
     alert(`Você ganhou em ${numberOfMoves} jogadas!` );
     let restart = prompt("Deseja reiniciar a partida?");
     if (restart.toLowerCase() == "sim") {
-        let all_decks = document.querySelectorAll(".line-cards");
-        for (let i=0; i<all_decks.length; i++)
-            all_decks[i].innerHTML = "";
+        document.querySelectorAll(".line-cards").forEach( (el) => el.innerHTML = "");
         clearInterval(interval);
         document.querySelector(".clock h1").innerHTML = 0;
         setTimeout(startGame, 10);
@@ -51,21 +49,28 @@ function endGame(){
 }
 
 function createCard(line){
-    let deck = document.querySelector(`.line-cards:nth-of-type(${line})`);
     let img = document.createElement("img");
     img.setAttribute("src", frontImg);
+    img.setAttribute("class", "front-card");
     let card = document.createElement("div");
     card.setAttribute("class", "card");
     card.setAttribute("onclick", "selectCard(this)");
+    let deck = document.querySelector(`.line-cards:nth-of-type(${line})`);
     card.appendChild(img);
     deck.appendChild(card);
 }
 
 function selectCard(card){
     let index = getIndex(card);
+    if (index == selectedCardIndex) {
+        return;
+    }
     let cardImg = `data/images/${cardsImg[index]}`;
-    card.firstChild.setAttribute("src", cardImg);
-    // TODO: 3d transition
+    let flippedCard = document.createElement("img");
+    flippedCard.setAttribute("src", cardImg);
+    flippedCard.setAttribute("class", "back-card");
+    card.appendChild(flippedCard);
+    flip(card);
       
     if (selectedCardIndex == -1)
         selectedCardIndex = index;
@@ -73,20 +78,21 @@ function selectCard(card){
     else{
         numberOfMoves+=1;
         let selectedCard = getCard(selectedCardIndex);
-        let selectedCardImg = selectedCard.firstChild.getAttribute("src");
+        let selectedCardImg = selectedCard.lastChild.getAttribute("src");
         if ( cardImg != selectedCardImg ) {
             setTimeout( () => {
-                card.firstChild.setAttribute("src", frontImg);
-                selectedCard.firstChild.setAttribute("src", frontImg);
+                flip(card);
+                flip(selectedCard);
+                flippedCard.remove();
+                selectedCard.lastChild.remove();
             }, 1000);
         }
-        else
+        else{
             cardsFlipped += 2;
-
-        if (cardsFlipped == numberOfCards) {
-            setTimeout(endGame, 100);
+            if (cardsFlipped == numberOfCards) {
+                setTimeout(endGame, 100);
+            }
         }
-
         selectedCardIndex = -1;
     }
 }
@@ -104,6 +110,13 @@ function getCard(index){
     if (line==2)
         return deck.children[index-numberOfCards/2]
     return deck.children[index];
+}
+
+function flip(card){
+    if(card.style.transform == "rotateY(180deg)")
+        card.style.transform = "rotateY(0deg)";
+    else
+        card.style.transform = "rotateY(180deg)";
 }
 
 startGame();
